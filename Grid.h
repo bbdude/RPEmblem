@@ -10,22 +10,20 @@
 #include "Weapon.h"
 using namespace std;
 
-template<class type>
-class Node
-{
-public:
-	type object;
-};
 class Land
 {
 public:
 	GLuint	texture;
 	float resistance;
 	bool walkable;
+	bool blueHighLight;
+	bool redHighLight;
 	vector2 position;
 	void init()
 	{}
 	virtual void draw()
+	{}
+	virtual void draw(bool triggerColors)
 	{}
 	virtual bool load()
 	{
@@ -42,6 +40,8 @@ public:
 	{
 		resistance = 100000;
 		health = 10;
+		redHighLight = true;
+		blueHighLight = false;
 	}
 	virtual void draw()
 	{
@@ -56,6 +56,32 @@ public:
 		glTexCoord2f(0, 0); glVertex3f(position.x - 1, position.y + 0.11 - 1, 0);
 		//glColor3f(0, 1, 0);
 		glTexCoord2f(1,0); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
+		//glColor3f(0, 0, 1);
+		glTexCoord2f(1, 1); glVertex3f(position.x - 1.11, position.y - 1, 0);
+		//glColor3f(0, 0, 0);
+		glTexCoord2f(0, 1); glVertex3f(position.x - 1, position.y - 1, 0);
+		glPopMatrix();
+		glDisable(GL_TEXTURE_2D);
+		glEnd();
+	}
+	virtual void draw(bool triggerColors)
+	{
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glBegin(GL_QUADS);
+		glPushMatrix();
+
+		//glColor3f(1, 0, 0);
+		glLoadIdentity();
+		vector3 color(1, 1, 1);
+		if (redHighLight)
+			color = vector3(1, 0.2, 0.2);
+		if (blueHighLight)
+			color = vector3(0.2, 1, 0.2);
+		glColor3f(1, 1, 1);
+		glTexCoord2f(0, 0); glVertex3f(position.x - 1, position.y + 0.11 - 1, 0);
+		//glColor3f(0, 1, 0);
+		glTexCoord2f(1, 0); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
 		//glColor3f(0, 0, 1);
 		glTexCoord2f(1, 1); glVertex3f(position.x - 1.11, position.y - 1, 0);
 		//glColor3f(0, 0, 0);
@@ -90,13 +116,13 @@ class Dirt :Land
 {
 public:
 	Dirt(void)
-	{
-
-	}
+	{}
 	~Dirt(){}
 	void init()
 	{
-		resistance = 2;
+		resistance = 20;
+		redHighLight = true;
+		blueHighLight = false;
 	}
 	virtual void draw()
 	{
@@ -119,6 +145,8 @@ public:
 		glDisable(GL_TEXTURE_2D);
 		glEnd();
 	}
+	virtual void draw(bool triggerColors)
+	{}
 	virtual bool load()
 	{
 		texture = SOIL_load_OGL_texture
@@ -171,6 +199,8 @@ public:
 		glEnd();
 		//belowContent->draw();
 	}
+	virtual void draw(bool triggerColors)
+	{}
 	virtual bool load()
 	{
 		texture = SOIL_load_OGL_texture
@@ -204,6 +234,7 @@ public:
 	std::string name;
 	Weapon * weapon;
 	int turnOrder;
+	int carryDistance = 100;//5 tiles of dirt
 
 	virtual void init(vector2 change, string newName)
 	{
@@ -230,11 +261,8 @@ public:
 		glLoadIdentity();
 		glColor3f(1, 1, 1);
 		glTexCoord2f(0, 0); glVertex3f(position.x - 1, position.y + 0.11 - 1, 0);
-		//glColor3f(0, 1, 0);
 		glTexCoord2f(1,0); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
-		//glColor3f(0, 0, 1);
 		glTexCoord2f(1, 1); glVertex3f(position.x - 1.11, position.y - 1, 0);
-		//glColor3f(0, 0, 0);
 		glTexCoord2f(0,1); glVertex3f(position.x - 1, position.y - 1, 0);
 		glPopMatrix();
 		glDisable(GL_TEXTURE_2D);
@@ -533,8 +561,10 @@ public:
 
 		for (int i = 0; i < 18; i++) {
 			for (int ii = 0; ii < 18; ii++) {
-
-				nodes[i][ii]->draw();
+				//if (turn <= 3)
+				//	nodes[i][ii]->draw(true);
+				//else
+					nodes[i][ii]->draw();
 				
 				/*if (Dirt * p = dynamic_cast<Dirt*>(ii))
 				{
@@ -554,6 +584,7 @@ public:
 		playable["Swordsman"]->draw();
 		playable["Axeman"]->draw();
 		card.draw();
+		
 	}
 	void drawSquare(vector2 pos)
 	{
