@@ -258,8 +258,8 @@ void mouseClick(int button, int state, int x, int y)
 		try{
 			if (grid.selectedNode == vector2(counterx, countery))//Deselects node
 			{
-				grid.selectedNode = vector2(-1, -1);
 				grid.nodes.at(counterx).at(countery) = grid.sel.belowContent;
+				grid.move = true;
 			}
 			else //Selects new node
 			{

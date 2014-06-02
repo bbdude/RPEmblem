@@ -7,6 +7,7 @@
 #include <gl/GL.h>
 #include <gl\GLU.h>
 #include "SOIL.h"
+#include "Weapon.h"
 using namespace std;
 
 template<class type>
@@ -54,11 +55,11 @@ public:
 		glColor3f(1, 1, 1);
 		glTexCoord2f(0, 0); glVertex3f(position.x - 1, position.y + 0.11 - 1, 0);
 		//glColor3f(0, 1, 0);
-		glTexCoord2f(0, 1); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
+		glTexCoord2f(1,0); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
 		//glColor3f(0, 0, 1);
 		glTexCoord2f(1, 1); glVertex3f(position.x - 1.11, position.y - 1, 0);
 		//glColor3f(0, 0, 0);
-		glTexCoord2f(1, 0); glVertex3f(position.x - 1, position.y - 1, 0);
+		glTexCoord2f(0, 1); glVertex3f(position.x - 1, position.y - 1, 0);
 		glPopMatrix();
 		glDisable(GL_TEXTURE_2D);
 		glEnd();
@@ -109,11 +110,11 @@ public:
 		glColor3f(1, 1, 1);
 		glTexCoord2f(0, 0); glVertex3f(position.x - 1, position.y + 0.11 - 1, 0);
 		//glColor3f(0, 1, 0);
-		glTexCoord2f(0, 1); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
+		glTexCoord2f(1,0); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
 		//glColor3f(0, 0, 1);
 		glTexCoord2f(1, 1); glVertex3f(position.x - 1.11, position.y - 1, 0);
 		//glColor3f(0, 0, 0);
-		glTexCoord2f(1, 0); glVertex3f(position.x - 1, position.y - 1, 0);
+		glTexCoord2f(0, 1); glVertex3f(position.x - 1, position.y - 1, 0);
 		glPopMatrix();
 		glDisable(GL_TEXTURE_2D);
 		glEnd();
@@ -198,9 +199,12 @@ public:
 	int health;
 	GLint texture;
 	vector<vector<Land*>> pathTaken;
-	vector2 position;
-	vector2 cord;
+	vector2 position;//The actual value between -2 and 2
+	vector2 cord;//The cords on the grid
 	std::string name;
+	Weapon * weapon;
+	int turnOrder;
+
 	virtual void init(vector2 change, string newName)
 	{
 		health = 1;
@@ -211,11 +215,14 @@ public:
 
 		name = newName;
 		load();
+		//weapon->type();
+		//Initialize weapon here
 	}
 	virtual void draw()
 	{
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
+		//glRotatef(90, 0, 0, 1);
 		glBegin(GL_QUADS);
 		glPushMatrix();
 
@@ -224,24 +231,33 @@ public:
 		glColor3f(1, 1, 1);
 		glTexCoord2f(0, 0); glVertex3f(position.x - 1, position.y + 0.11 - 1, 0);
 		//glColor3f(0, 1, 0);
-		glTexCoord2f(0, 1); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
+		glTexCoord2f(1,0); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
 		//glColor3f(0, 0, 1);
 		glTexCoord2f(1, 1); glVertex3f(position.x - 1.11, position.y - 1, 0);
 		//glColor3f(0, 0, 0);
-		glTexCoord2f(1, 0); glVertex3f(position.x - 1, position.y - 1, 0);
+		glTexCoord2f(0,1); glVertex3f(position.x - 1, position.y - 1, 0);
 		glPopMatrix();
 		glDisable(GL_TEXTURE_2D);
 		glEnd();
+		//glRotatef(-90, 0, 0, 1);
 	}
 	virtual bool load()
 	{
 		return false;
 	}
+	virtual void updatePos(vector2 newCord)
+	{
+		cord = newCord;
+
+		position.x = (0.11) * cord.x + (0.11);
+		position.y = (0.11) * cord.y;
+	}
 };
-class Rock : Characters
+class HeavyMace : Characters
 {
 	virtual void init(vector2 change, string newName)
 	{
+		turnOrder = 1;
 		health = 10;
 		cord = change;
 
@@ -249,12 +265,14 @@ class Rock : Characters
 		position.y = (0.11) * cord.y;
 		name = newName;
 		load();
+
+		weapon = (Weapon*)new MACE(20);
 	}
 	virtual bool load()
 	{
 		texture = SOIL_load_OGL_texture
 			(
-			"Rock.png",
+			"rock.png",
 			SOIL_LOAD_AUTO,
 			SOIL_CREATE_NEW_ID,
 			SOIL_FLAG_INVERT_Y
@@ -272,10 +290,11 @@ class Rock : Characters
 		return true;
 	}
 };
-class Paper : Characters
+class Swordsman : Characters
 {
 	virtual void init(vector2 change, string newName)
 	{
+		turnOrder = 3;
 		health = 10;
 		cord = change;
 
@@ -283,6 +302,8 @@ class Paper : Characters
 		position.y = (0.11) * cord.y;
 		name = newName;
 		load();
+
+		weapon = (Weapon*)new SWORD(20);
 	}
 	virtual bool load()
 	{
@@ -306,10 +327,11 @@ class Paper : Characters
 		return true;
 	}
 };
-class Emblem : Characters
+class Axeman : Characters
 {
 	virtual void init(vector2 change, string newName)
 	{
+		turnOrder = 2;
 		health = 10;
 		cord = change;
 
@@ -317,13 +339,15 @@ class Emblem : Characters
 		position.y = (0.11) * cord.y;
 		name = newName;
 		load();
+
+		weapon = (Weapon*)new AXE(20);
 	}
 
 	virtual bool load()
 	{
 		texture = SOIL_load_OGL_texture
 			(
-			"Emblem.png",
+			"emblem.png",
 			SOIL_LOAD_AUTO,
 			SOIL_CREATE_NEW_ID,
 			SOIL_FLAG_INVERT_Y
@@ -341,33 +365,130 @@ class Emblem : Characters
 		return true;
 	}
 };
+
+
+class PlayCard
+{
+public:
+	GLint texture;
+	Characters * sel;
+	Characters * opSel;
+	bool showOpSel;
+	PlayCard(void)
+	{
+		showOpSel = false;
+	}
+	~PlayCard(){}
+	virtual void draw()
+	{
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glBegin(GL_QUADS);
+		glPushMatrix();
+
+		glLoadIdentity();
+		glColor3f(1, 1, 1);
+		glTexCoord2f(0, 0); glVertex3f(0.5f, 1, 0);
+		glTexCoord2f(1, 0); glVertex3f(1, 1, 0);
+		glTexCoord2f(1, 1); glVertex3f(1, 0.75f, 0);
+		glTexCoord2f(0, 1); glVertex3f(0.5f, 0.75f, 0);
+		glPopMatrix();
+		glEnd();
+		
+		
+		glBindTexture(GL_TEXTURE_2D, sel->texture);
+		glBegin(GL_QUADS);
+		glPushMatrix();
+		//glRotatef(90, 1, 0, 0);
+
+		//glColor3f(1, 0, 0);
+		glLoadIdentity();
+		glColor3f(1, 1, 1);
+		glTexCoord2f(0, 0); glVertex3f(0.51f, 0.99, 0);
+		//glColor3f(0, 1, 0);
+		glTexCoord2f(1, 0); glVertex3f(0.76, 0.99, 0);
+		glTexCoord2f(1, 1); glVertex3f(0.76, 0.76f, 0);
+		glTexCoord2f(0, 1); glVertex3f(0.51f, 0.76f, 0);
+		glPopMatrix();
+		glEnd();
+		
+		if (showOpSel)
+		{
+			glBindTexture(GL_TEXTURE_2D, opSel->texture);
+			glBegin(GL_QUADS);
+			glPushMatrix();
+			//glRotatef(90, 1, 0, 0);
+
+			//glColor3f(1, 0, 0);
+			glLoadIdentity();
+			glColor3f(1, 1, 1);
+			glTexCoord2f(0, 0); glVertex3f(0.76f, 0.99, 0);
+			//glColor3f(0, 1, 0);
+			glTexCoord2f(1, 0); glVertex3f(0.99, 0.99, 0);
+			glTexCoord2f(1, 1); glVertex3f(0.99, 0.76f, 0);
+			glTexCoord2f(0, 1); glVertex3f(0.76f, 0.76f, 0);
+			glPopMatrix();
+			glEnd();
+		}
+		glDisable(GL_TEXTURE_2D);
+	}
+	virtual bool load()
+	{
+		texture = SOIL_load_OGL_texture
+			(
+			"card.png",
+			SOIL_LOAD_AUTO,
+			SOIL_CREATE_NEW_ID,
+			SOIL_FLAG_INVERT_Y
+			);
+
+		if (texture == 0)
+			//throw std::bad_exception("Failure to load image");
+			return false;
+
+
+		// Typical Texture Generation Using Data From The Bitmap
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		return true;
+	}
+};
 class Grid
 {
 public:
 	Grid();
 	~Grid();
 public:
-	vector2 screen;
-	vector2 selectedNode;
-	map<unsigned char, bool> keyState;
-	map<string, Characters*> playable;
-	map<string, Characters*> unplayable;
-	vector<vector<Land*>> nodes;
-	Selection sel;
-	enum STATE { SPLASH, MENU, GAME, EXIT, OPTIONS };
-	STATE curr;
+	vector2 screen;//Screen size
+	vector2 selectedNode;//The cords for the selected node
+	map<unsigned char, bool> keyState;//State of each key
+	map<string, Characters*> playable;//List of all the character player
+	map<string, Characters*> unplayable;//List of all the non-character players
+	vector<vector<Land*>> nodes;//Each tile
+	PlayCard card;
+	Selection sel;//The selected tile
+	Characters * selCharacter;//The selected character
+	enum STATE { SPLASH, MENU, GAME, EXIT, OPTIONS };//Game states
+	STATE curr;//The current state
+	bool move;
+	int turn;//Controls who can act and who cannot
 	
 	void init(int x/*18*/, int y/*18*/)
 	{
-		playable["Rock"] = (Characters*)new Rock;
-		playable["Paper"] = (Characters*)new Paper;
-		playable["Emblem"] = (Characters*)new Emblem;
-		playable["Rock"]->init(vector2(1,1),"Rock");
-		playable["Paper"]->init(vector2(1, 3), "Paper");
-		playable["Emblem"]->init(vector2(3, 1), "Emblem");
+		turn = 1;
+		playable["HeavyMace"] = (Characters*)new HeavyMace;
+		playable["Swordsman"] = (Characters*)new Swordsman;
+		playable["Axeman"] = (Characters*)new Axeman;
+		playable["HeavyMace"]->init(vector2(1,1),"HeavyMace");
+		playable["Swordsman"]->init(vector2(1, 3), "Swordsman");
+		playable["Axeman"]->init(vector2(3, 1), "Axeman");
 		selectedNode = vector2(-1, -1);
 		//sel.init();
 		sel.load();
+		card.load();
+		card.sel = (Characters*)playable["HeavyMace"];
 		vector<vector<Land*>> newNode = vector<vector<Land*>>(18);
 		for (int i = 0; i < x; i++)
 		{
@@ -429,9 +550,10 @@ public:
 			}
 		}
 
-		playable["Rock"]->draw();
-		playable["Paper"]->draw();
-		playable["Emblem"]->draw();
+		playable["HeavyMace"]->draw();
+		playable["Swordsman"]->draw();
+		playable["Axeman"]->draw();
+		card.draw();
 	}
 	void drawSquare(vector2 pos)
 	{
@@ -466,8 +588,34 @@ public:
 	}
 	void update()
 	{
-
+		//if (selectedNode != vector2(-1,-1))
+		for (map<string, Characters*>::iterator it = playable.begin(); it != playable.end();it++)
+		{
+			if (turn == it->second->turnOrder)
+			{
+				card.sel = (Characters*)it->second;
+				if (move)
+				{
+					it->second->updatePos(selectedNode);
+					selectedNode = vector2(-1, -1);
+					turn++;
+					move = false;
+				}
+			}
+			if (selectedNode == it->second->cord)
+			{
+				selCharacter = (Characters*)it->second;
+				card.opSel = (Characters*)selCharacter;
+				card.showOpSel = true;
+			}
+			else
+			{
+				card.showOpSel = false;
+				selCharacter = (Characters*)new Characters;
+			}
+		}
+		if (turn > 3)
+			turn = 1;
 	}
 };
-
 
