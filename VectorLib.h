@@ -21,6 +21,7 @@ public:
 	vector2 operator - (float change);
 	vector2 operator + (float change);
 	vector2 operator * (float change);
+	bool checkSpace (vector2 cord,int dist);
 	//Maths
 	float magnitude();
 	float dotProduct(vector2 change);

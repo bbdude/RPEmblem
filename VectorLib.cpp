@@ -86,8 +86,14 @@ vector2 vector2::operator + (float change)
 }
 vector2 vector2::operator * (float change)
 {
-	vector2 temp(x * change,y * change);
+	vector2 temp(x * change, y * change);
 	return temp;
+}
+bool vector2::checkSpace (vector2 cord, int dist)
+{
+	if ((x - dist <= cord.x && x + dist >= cord.x) && (y - dist <= cord.y && y + dist >= cord.y))
+	return true;
+	return false;
 }
 //Maths
 float vector2::magnitude()

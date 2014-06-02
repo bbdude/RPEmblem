@@ -77,8 +77,8 @@ public:
 		if (redHighLight)
 			color = vector3(1, 0.2, 0.2);
 		if (blueHighLight)
-			color = vector3(0.2, 1, 0.2);
-		glColor3f(1, 1, 1);
+			color = vector3(0.2, 0.2, 1);
+		glColor3f(color.x, color.y, color.z);
 		glTexCoord2f(0, 0); glVertex3f(position.x - 1, position.y + 0.11 - 1, 0);
 		//glColor3f(0, 1, 0);
 		glTexCoord2f(1, 0); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
@@ -146,7 +146,31 @@ public:
 		glEnd();
 	}
 	virtual void draw(bool triggerColors)
-	{}
+	{
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glBegin(GL_QUADS);
+		glPushMatrix();
+
+		//glColor3f(1, 0, 0);
+		glLoadIdentity();
+		vector3 color(1, 1, 1);
+		if (redHighLight)
+			color = vector3(1, 0.2, 0.2);
+		if (blueHighLight)
+			color = vector3(0.2, 0.2, 1);
+		glColor3f(color.x,color.y,color.z);
+		glTexCoord2f(0, 0); glVertex3f(position.x - 1, position.y + 0.11 - 1, 0);
+		//glColor3f(0, 1, 0);
+		glTexCoord2f(1, 0); glVertex3f(position.x - 1.11, position.y + 0.11 - 1, 0);
+		//glColor3f(0, 0, 1);
+		glTexCoord2f(1, 1); glVertex3f(position.x - 1.11, position.y - 1, 0);
+		//glColor3f(0, 0, 0);
+		glTexCoord2f(0, 1); glVertex3f(position.x - 1, position.y - 1, 0);
+		glPopMatrix();
+		glDisable(GL_TEXTURE_2D);
+		glEnd();
+	}
 	virtual bool load()
 	{
 		texture = SOIL_load_OGL_texture
@@ -492,8 +516,8 @@ public:
 	vector2 screen;//Screen size
 	vector2 selectedNode;//The cords for the selected node
 	map<unsigned char, bool> keyState;//State of each key
-	map<string, Characters*> playable;//List of all the character player
-	map<string, Characters*> unplayable;//List of all the non-character players
+	map<int, Characters*> playable;//List of all the character player
+	map<int, Characters*> unplayable;//List of all the non-character players
 	vector<vector<Land*>> nodes;//Each tile
 	PlayCard card;
 	Selection sel;//The selected tile
@@ -506,17 +530,17 @@ public:
 	void init(int x/*18*/, int y/*18*/)
 	{
 		turn = 1;
-		playable["HeavyMace"] = (Characters*)new HeavyMace;
-		playable["Swordsman"] = (Characters*)new Swordsman;
-		playable["Axeman"] = (Characters*)new Axeman;
-		playable["HeavyMace"]->init(vector2(1,1),"HeavyMace");
-		playable["Swordsman"]->init(vector2(1, 3), "Swordsman");
-		playable["Axeman"]->init(vector2(3, 1), "Axeman");
+		playable[1] = (Characters*)new HeavyMace;
+		playable[2] = (Characters*)new Swordsman;
+		playable[3] = (Characters*)new Axeman;
+		playable[1]->init(vector2(1,1),"HeavyMace");
+		playable[2]->init(vector2(1, 3), "Swordsman");
+		playable[3]->init(vector2(3, 1), "Axeman");
 		selectedNode = vector2(-1, -1);
 		//sel.init();
 		sel.load();
 		card.load();
-		card.sel = (Characters*)playable["HeavyMace"];
+		card.sel = (Characters*)playable[1];
 		vector<vector<Land*>> newNode = vector<vector<Land*>>(18);
 		for (int i = 0; i < x; i++)
 		{
@@ -558,12 +582,32 @@ public:
 
 		//vector<vector<Land*>>::iterator i;
 		//vector<Land*>::iterator ii;
-
+		/*int testturn = 4 - turn;
+		testturn--;
+		if (testturn < 1)
+			testturn = 3;*/
 		for (int i = 0; i < 18; i++) {
 			for (int ii = 0; ii < 18; ii++) {
-				//if (turn <= 3)
-				//	nodes[i][ii]->draw(true);
-				//else
+				if (turn <= 3)
+				{
+					/*int checkturn = turn + 1;
+					if (checkturn > 3)
+						checkturn = 3;
+					if (checkturn == 2)
+						checkturn--;*/
+					if (playable[4- turn]->cord.checkSpace(vector2(i, ii), 5))
+					{
+						nodes[i][ii]->blueHighLight = true;
+						nodes[i][ii]->redHighLight = false;
+					}
+					else
+					{
+						nodes[i][ii]->blueHighLight = false;
+						nodes[i][ii]->redHighLight = true;
+					}
+					nodes[i][ii]->draw(true);
+				}
+				else
 					nodes[i][ii]->draw();
 				
 				/*if (Dirt * p = dynamic_cast<Dirt*>(ii))
@@ -580,9 +624,9 @@ public:
 			}
 		}
 
-		playable["HeavyMace"]->draw();
-		playable["Swordsman"]->draw();
-		playable["Axeman"]->draw();
+		playable[1]->draw();
+		playable[2]->draw();
+		playable[3]->draw();
 		card.draw();
 		
 	}
@@ -620,7 +664,7 @@ public:
 	void update()
 	{
 		//if (selectedNode != vector2(-1,-1))
-		for (map<string, Characters*>::iterator it = playable.begin(); it != playable.end();it++)
+		for (map<int, Characters*>::iterator it = playable.begin(); it != playable.end();it++)
 		{
 			if (turn == it->second->turnOrder)
 			{
