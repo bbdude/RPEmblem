@@ -66,6 +66,7 @@
   <ItemGroup>
     <Library Include="glut32.lib" />
     <Library Include="SOIL.lib" />
+    <Library Include="..\..\..\..\..\Downloads\tinyxml2-master\tinyxml2-master\tinyxml2\bin\Win32-Debug-Dll\tinyxml2.lib" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="dirt.png">
@@ -89,5 +90,10 @@
     <Image Include="card.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="LevelData.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

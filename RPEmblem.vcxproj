@@ -56,6 +56,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>tinyxml.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -102,6 +103,7 @@
     <None Include="glut32.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="..\..\..\..\..\Downloads\tinyxml2-master\tinyxml2-master\tinyxml2\bin\Win32-Debug-Dll\tinyxml2.lib" />
     <Library Include="glut32.lib" />
     <Library Include="SOIL.lib" />
   </ItemGroup>
@@ -113,6 +115,9 @@
     <Image Include="rock.png" />
     <Image Include="select.png" />
     <Image Include="wall.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="LevelData.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
